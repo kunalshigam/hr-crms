@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  departments Department[]
+  employees   Employee[]
+  jobs        Job[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(EMPLOYEE)
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  employee  Employee?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  SUPER_ADMIN
+  HR_ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  employees Employee[]
+  jobs      Job[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Employee {
+  id         String   @id @default(cuid())
+  userId     String?  @unique
+  user       User?    @relation(fields: [userId], references: [id])
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  
+  firstName  String
+  lastName   String
+  email      String   @unique
+  phone      String?
+  avatar     String?
+  
+  status     EmployeeStatus @default(ACTIVE)
+  joinedAt   DateTime
+  
+  deptId     String?
+  department Department? @relation(fields: [deptId], references: [id])
+  
+  designation String?
+  location   String?
+  salary     Float    @default(0)
+  
+  managerId  String?
+  manager    Employee?  @relation("ManagerToEmployee", fields: [managerId], references: [id])
+  subordinates Employee[] @relation("ManagerToEmployee")
+
+  attendances Attendance[]
+  leaves      Leave[]
+  payrolls    Payroll[]
+  reviewsAsReviewer Review[] @relation("Reviewer")
+  reviewsAsReviewee Review[] @relation("Reviewee")
+  goals       Goal[]
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  empId     String
+  employee  Employee @relation(fields: [empId], references: [id])
+  date      DateTime
+  clockIn   DateTime?
+  clockOut  DateTime?
+  status    AttendanceStatus
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+}
+
+model Leave {
+  id        String   @id @default(cuid())
+  empId     String
+  employee  Employee @relation(fields: [empId], references: [id])
+  type      LeaveType
+  startDate DateTime
+  endDate   DateTime
+  days      Float
+  reason    String?
+  status    LeaveStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum LeaveType {
+  SICK
+  CASUAL
+  PAID
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Payroll {
+  id        String   @id @default(cuid())
+  empId     String
+  employee  Employee @relation(fields: [empId], references: [id])
+  month     Int
+  year      Int
+  baseSalary Float
+  bonus     Float    @default(0)
+  deductions Float   @default(0)
+  netSalary Float
+  status    PayrollStatus @default(DRAFT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PayrollStatus {
+  DRAFT
+  PENDING_APPROVAL
+  PAID
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  title       String
+  description String?
+  deptId      String?
+  department  Department? @relation(fields: [deptId], references: [id])
+  location    String
+  type        String   // Full-time, Part-time, Contract
+  salaryRange String?
+  status      JobStatus @default(DRAFT)
+  candidates  Candidate[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum JobStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+model Candidate {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id])
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+  resumeUrl String?
+  stage     String   @default("Applied") // Applied, Screening, Interview, Offer, Hired, Rejected
+  score     Float?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  revieweeId String
+  reviewee   Employee @relation("Reviewee", fields: [revieweeId], references: [id])
+  reviewerId String
+  reviewer   Employee @relation("Reviewer", fields: [reviewerId], references: [id])
+  cycle      String   // e.g., "Q3 2026"
+  rating     Float?
+  feedback   String?
+  status     ReviewStatus @default(PENDING)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum ReviewStatus {
+  PENDING
+  COMPLETED
+}
+
+model Goal {
+  id        String   @id @default(cuid())
+  empId     String
+  employee  Employee @relation(fields: [empId], references: [id])
+  title     String
+  quarter   String
+  progress  Int      @default(0)
+  krs       Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   // could be tied to User if we want
+  title     String
+  body      String
+  kind      String   // leave, candidate, payroll, perf, training
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=1440"/>
+<title>Pulse HR — HRMS Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  body { margin: 0; background: var(--shell-bg); color: var(--text); font-family: var(--f-body); }
+  .shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+  .nav-rail { background: var(--shell-side); border-right: 1px solid var(--shell-border); padding: 18px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; padding: 6px 8px 18px; }
+  .nav-brand .logo { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); display: grid; place-items: center; color: white; font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+  .nav-brand .name { font-family: var(--f-display); font-size: 17px; font-weight: 600; color: var(--shell-text); letter-spacing: -0.01em; }
+  .nav-brand .name small { display: block; font-family: var(--f-body); font-size: 10px; color: var(--shell-muted); font-weight: 400; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 1px; }
+  .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--shell-muted); padding: 14px 10px 6px; font-weight: 600; }
+  .nav-link { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 7px; font-size: 13px; color: var(--shell-text-2); cursor: pointer; user-select: none; line-height: 1.3; }
+  .nav-link:hover { background: var(--shell-hover); color: var(--shell-text); }
+  .nav-link.active { background: var(--shell-active); color: var(--primary); font-weight: 600; }
+  .nav-link .num { margin-left: auto; font-size: 10px; color: var(--shell-muted); font-variant-numeric: tabular-nums; }
+  .nav-link.active .num { color: var(--primary); }
+  .canvas { padding: 32px 40px 80px; max-width: 1600px; }
+  .canvas-head { margin-bottom: 28px; padding-bottom: 18px; border-bottom: 1px solid var(--shell-border); }
+  .canvas-head h1 { font-family: var(--f-display); font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: var(--shell-text); margin: 0 0 6px; }
+  .canvas-head .crumb { font-size: 12px; color: var(--shell-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; font-weight: 600; }
+  .canvas-head p { color: var(--shell-text-2); font-size: 14px; margin: 6px 0 0; max-width: 720px; }
+  .frame { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--sh-md); overflow: hidden; margin-bottom: 32px; }
+  .frame-label { padding: 10px 16px; background: var(--shell-side-2); border-bottom: 1px solid var(--shell-border); font-size: 12px; font-weight: 600; color: var(--shell-text); display: flex; justify-content: space-between; }
+  .frame-label .frame-meta { font-family: var(--f-mono); font-size: 11px; color: var(--shell-muted); font-weight: 400; }
+  .frame-desktop .frame-body { width: 1400px; min-height: 760px; max-width: 100%; }
+  .frame-mobile-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding: 24px; background: var(--shell-side-2); }
+  .toolbar { position: sticky; top: 0; z-index: 10; background: var(--shell-bg); padding: 14px 0; border-bottom: 1px solid var(--shell-border); margin-bottom: 24px; display: flex; gap: 10px; align-items: center; }
+  .toolbar .pill-group { display: inline-flex; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+  .toolbar .pill-group button { background: transparent; border: none; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text-2); }
+  .toolbar .pill-group button.on { background: var(--primary); color: white; }
+  body.dark { color-scheme: dark; }
+  body.dark .nav-rail { background: var(--shell-side); }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="primitives.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="screens-auth.jsx"></script>
+<script type="text/babel" src="screens-dashboard.jsx"></script>
+<script type="text/babel" src="screens-employees.jsx"></script>
+<script type="text/babel" src="screens-recruitment.jsx"></script>
+<script type="text/babel" src="screens-attendance-payroll.jsx"></script>
+<script type="text/babel" src="screens-perf-global.jsx"></script>
+<script type="text/babel" src="screens-mobile.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// Section structure
+const SECTIONS = [
+  {
+    key: "auth", title: "Authentication", desc: "Sign-in, sign-up, password recovery — the gates to your workspace.",
+    screens: [
+      { id: "login", title: "Login", get: () => <AuthScreens.ScreenLogin/> },
+      { id: "register", title: "Register / Workspace setup", get: () => <AuthScreens.ScreenRegister/> },
+      { id: "forgot", title: "Forgot password", get: () => <AuthScreens.ScreenForgot/> },
+    ],
+  },
+  {
+    key: "dashboard", title: "Dashboard", desc: "At-a-glance org health: headcount, hires, attendance, payroll.",
+    screens: [
+      { id: "overview", title: "Overview dashboard", get: () => <DashboardScreens.ScreenDashboard/> },
+    ],
+  },
+  {
+    key: "employees", title: "Employees", desc: "The people directory — list, profile, onboarding, org chart.",
+    screens: [
+      { id: "directory", title: "Employee directory", get: () => <EmployeeScreens.ScreenDirectory/> },
+      { id: "profile", title: "Employee profile", get: () => <EmployeeScreens.ScreenProfile/> },
+      { id: "add", title: "Add new employee", get: () => <EmployeeScreens.ScreenAddEmployee/> },
+      { id: "org", title: "Organization chart", get: () => <EmployeeScreens.ScreenOrgChart/> },
+    ],
+  },
+  {
+    key: "recruit", title: "Recruitment", desc: "Job listings, applicant pipeline, candidate review, interview ops.",
+    screens: [
+      { id: "jobs", title: "Job listings", get: () => <RecruitmentScreens.ScreenJobs/> },
+      { id: "create-job", title: "Create job posting", get: () => <RecruitmentScreens.ScreenCreateJob/> },
+      { id: "pipeline", title: "Applicant pipeline (Kanban)", get: () => <RecruitmentScreens.ScreenPipeline/> },
+      { id: "candidate", title: "Candidate profile", get: () => <RecruitmentScreens.ScreenCandidate/> },
+      { id: "schedule", title: "Interview scheduler", get: () => <RecruitmentScreens.ScreenScheduler/> },
+    ],
+  },
+  {
+    key: "time", title: "Time & Attendance", desc: "Clock-ins, leave balances, request flow, approvals.",
+    screens: [
+      { id: "att", title: "Attendance overview", get: () => <AttendancePayrollScreens.ScreenAttendance/> },
+      { id: "leave", title: "Leave management", get: () => <AttendancePayrollScreens.ScreenLeaveManagement/> },
+      { id: "leave-form", title: "Leave request (modal)", get: () => <AttendancePayrollScreens.ScreenLeaveRequest/> },
+    ],
+  },
+  {
+    key: "payroll", title: "Payroll", desc: "Pay runs, breakdowns, payslip generation.",
+    screens: [
+      { id: "payroll-dash", title: "Payroll dashboard", get: () => <AttendancePayrollScreens.ScreenPayroll/> },
+      { id: "payslip", title: "Payslip detail", get: () => <AttendancePayrollScreens.ScreenPayslip/> },
+    ],
+  },
+  {
+    key: "perf", title: "Performance", desc: "Cycles, ratings, review forms, goals & OKRs.",
+    screens: [
+      { id: "perf-overview", title: "Performance overview", get: () => <PerfGlobalScreens.ScreenPerformance/> },
+      { id: "review", title: "Review form", get: () => <PerfGlobalScreens.ScreenReviewForm/> },
+      { id: "goals", title: "Goals & OKRs", get: () => <PerfGlobalScreens.ScreenGoals/> },
+    ],
+  },
+  {
+    key: "training", title: "Training", desc: "Course catalog and learner progress.",
+    screens: [
+      { id: "training-cat", title: "Training catalog", get: () => <PerfGlobalScreens.ScreenTraining/> },
+      { id: "course", title: "Course detail", get: () => <PerfGlobalScreens.ScreenCourse/> },
+    ],
+  },
+  {
+    key: "reports", title: "Reports", desc: "Cross-module analytics for HR leaders.",
+    screens: [
+      { id: "reports-hub", title: "Reports hub", get: () => <PerfGlobalScreens.ScreenReports/> },
+      { id: "report-detail", title: "Report detail (Headcount)", get: () => <PerfGlobalScreens.ScreenReportDetail/> },
+    ],
+  },
+  {
+    key: "settings", title: "Settings", desc: "Workspace, roles, departments, integrations, notifications.",
+    screens: [
+      { id: "company", title: "Company settings", get: () => <PerfGlobalScreens.ScreenSettingsCompany/> },
+      { id: "roles", title: "Roles & permissions", get: () => <PerfGlobalScreens.ScreenRoles/> },
+      { id: "depts", title: "Departments & designations", get: () => <PerfGlobalScreens.ScreenDepartments/> },
+      { id: "ints", title: "Integrations", get: () => <PerfGlobalScreens.ScreenIntegrations/> },
+      { id: "notifs", title: "Notification settings", get: () => <PerfGlobalScreens.ScreenNotifSettings/> },
+    ],
+  },
+  {
+    key: "global", title: "Global components", desc: "Cross-cutting overlays and edge-state screens.",
+    screens: [
+      { id: "notif-center", title: "Notification center", get: () => <PerfGlobalScreens.ScreenNotifCenter/> },
+      { id: "search", title: "Global search (⌘K)", get: () => <PerfGlobalScreens.ScreenGlobalSearch/> },
+      { id: "empty", title: "Empty states", get: () => <PerfGlobalScreens.ScreenEmpty/> },
+      { id: "error", title: "Error / 404 / 500", get: () => <PerfGlobalScreens.ScreenError/> },
+    ],
+  },
+  {
+    key: "mobile", title: "Mobile app", desc: "Self-service iOS companion for employees and approvers.",
+    mobileGroup: true,
+    screens: [
+      { id: "m-login", title: "Login", get: () => <MobileScreens.MobileLogin/> },
+      { id: "m-home", title: "Home", get: () => <MobileScreens.MobileHome/> },
+      { id: "m-leave", title: "Apply leave", get: () => <MobileScreens.MobileLeaveRequest/> },
+      { id: "m-payslip", title: "Payslip", get: () => <MobileScreens.MobilePayslip/> },
+      { id: "m-dir", title: "Directory", get: () => <MobileScreens.MobileDirectory/> },
+      { id: "m-appr", title: "Approvals", get: () => <MobileScreens.MobileApproval/> },
+      { id: "m-prof", title: "Profile", get: () => <MobileScreens.MobileProfile/> },
+    ],
+  },
+];
+
+const ALL_FLAT = SECTIONS.flatMap(s => s.screens.map(sc => ({ ...sc, sectionKey: s.key, sectionTitle: s.title })));
+
+const Shell = () => {
+  const [active, setActive] = useState("dashboard");
+  const [mode, setMode] = useState("section"); // "section" | "all"
+  const [dark, setDark] = useState(false);
+  useEffect(() => { document.body.classList.toggle("dark", dark); }, [dark]);
+
+  const section = SECTIONS.find(s => s.key === active);
+  const totalScreens = ALL_FLAT.length;
+
+  return (
+    <div className="shell">
+      <aside className="nav-rail">
+        <div className="nav-brand">
+          <div className="logo">P</div>
+          <div className="name">Pulse HR<small>HRMS Design System</small></div>
+        </div>
+        <div className="nav-section-title">Modules</div>
+        {SECTIONS.map(s => (
+          <div key={s.key} data-screen-label={s.title}
+            className={"nav-link " + (active === s.key && mode === "section" ? "active" : "")}
+            onClick={() => { setActive(s.key); setMode("section"); }}>
+            {s.title}<span className="num">{s.screens.length}</span>
+          </div>
+        ))}
+        <div className="nav-section-title">View</div>
+        <div className={"nav-link " + (mode === "all" ? "active" : "")} onClick={() => setMode("all")}>
+          All screens<span className="num">{totalScreens}</span>
+        </div>
+        <div className="nav-section-title">Theme</div>
+        <div className="nav-link" onClick={() => setDark(d => !d)}>
+          {dark ? "☀️ Light mode" : "🌙 Dark mode"}
+        </div>
+        <div style={{ marginTop: 24, padding: 12, background: "var(--shell-side-2)", borderRadius: 8, fontSize: 11, color: "var(--shell-muted)", lineHeight: 1.5 }}>
+          {totalScreens} screens · 12 modules · web + iOS · designed for HR leaders, managers, and employees.
+        </div>
+      </aside>
+      <main className="canvas">
+        {mode === "section" ? (
+          <>
+            <div className="canvas-head">
+              <div className="crumb">{section.key === "mobile" ? "Mobile app" : "Web app · Module"}</div>
+              <h1>{section.title}</h1>
+              <p>{section.desc}</p>
+            </div>
+            {section.mobileGroup ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 28, justifyItems: "center" }}>
+                {section.screens.map(sc => (
+                  <div key={sc.id} data-screen-label={sc.title} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                    {sc.get()}
+                    <div style={{ fontSize: 12, color: "var(--shell-text-2)", fontWeight: 500 }}>{sc.title}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              section.screens.map(sc => (
+                <div key={sc.id} data-screen-label={sc.title}>{sc.get()}</div>
+              ))
+            )}
+          </>
+        ) : (
+          <>
+            <div className="canvas-head">
+              <div className="crumb">Catalog</div>
+              <h1>All {totalScreens} screens</h1>
+              <p>Every artboard in the system, in module order. Use the sidebar to jump to a single module.</p>
+            </div>
+            {SECTIONS.map(s => (
+              <section key={s.key} style={{ marginBottom: 48 }}>
+                <h2 style={{ fontFamily: "var(--f-display)", fontSize: 22, color: "var(--shell-text)", marginBottom: 14, letterSpacing: "-0.01em" }}>
+                  {s.title} <span style={{ fontSize: 13, color: "var(--shell-muted)", fontWeight: 400 }}>· {s.screens.length}</span>
+                </h2>
+                {s.mobileGroup ? (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, padding: "20px 0" }}>
+                    {s.screens.map(sc => (
+                      <div key={sc.id} data-screen-label={sc.title} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                        {sc.get()}
+                        <div style={{ fontSize: 12, fontWeight: 500 }}>{sc.title}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  s.screens.map(sc => <div key={sc.id} data-screen-label={sc.title}>{sc.get()}</div>)
+                )}
+              </section>
+            ))}
+          </>
+        )}
+      </main>
+    </div>
+  );
+};
+
+setTimeout(() => {
+  const root = ReactDOM.createRoot(document.getElementById("root"));
+  root.render(<Shell/>);
+}, 50);
+</script>
+</body>
+</html>
