@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { Search, Filter, Plus, Star, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { Modal } from '@/components/ui/Modal';
+import { toast } from 'sonner';
 
 type Candidate = {
   id: string;
@@ -19,12 +22,37 @@ type Job = {
 };
 
 export default function PipelineClient({ job, candidates }: { job: Job, candidates: Candidate[] }) {
-  const stages = ["Applied", "Screening", "Interview", "Offer", "Hired"];
+  const [search, setSearch] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const stages = [
+    { id: 'SOURCED', label: 'Sourced' },
+    { id: 'APPLIED', label: 'Applied' },
+    { id: 'SCREENING', label: 'Screening' },
+    { id: 'INTERVIEW', label: 'Interview' },
+    { id: 'OFFER', label: 'Offer' },
+    { id: 'HIRED', label: 'Hired' },
+    { id: 'REJECTED', label: 'Rejected' },
+  ];
+
+  const handleAddCandidate = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsModalOpen(false);
+      toast.success('Candidate added', {
+        description: 'New candidate has been added to the pipeline.',
+      });
+    }, 800);
+  };
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1400px] mx-auto h-full">
-      <div className="flex justify-between items-center">
-        <div className="flex gap-2 items-center">
+    <>
+      <div className="flex flex-col gap-6 max-w-[1400px] mx-auto h-full">
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2 items-center">
           <Link href="/recruitment" className="text-[13px] text-muted-foreground hover:text-foreground hover:underline transition-colors">
             ← All jobs
           </Link>
@@ -101,6 +129,49 @@ export default function PipelineClient({ job, candidates }: { job: Job, candidat
           );
         })}
       </div>
-    </div>
+      
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add candidate">
+        <form onSubmit={handleAddCandidate} className="flex flex-col gap-5">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">First name</label>
+              <input required type="text" placeholder="John" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Last name</label>
+              <input required type="text" placeholder="Doe" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Email</label>
+            <input required type="email" placeholder="john.doe@example.com" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Stage</label>
+            <select required className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all">
+              <option value="SOURCED">Sourced</option>
+              <option value="APPLIED">Applied</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Resume (Optional)</label>
+            <input type="file" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all file:border-0 file:bg-transparent file:text-[13px] file:font-medium file:text-primary hover:file:cursor-pointer" />
+          </div>
+
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-[13px] font-medium text-foreground hover:bg-surface rounded-lg transition-colors border border-transparent hover:border-border">
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-primary text-white text-[13px] font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50">
+              {isSubmitting ? 'Adding...' : 'Add candidate'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+      </div>
+    </>
   );
 }

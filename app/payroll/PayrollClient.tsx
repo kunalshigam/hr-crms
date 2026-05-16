@@ -2,6 +2,7 @@
 
 import { Download, Send } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { toast } from 'sonner';
 
 type Payroll = {
   id: string;
@@ -25,6 +26,24 @@ export default function PayrollClient({ records }: { records: Payroll[] }) {
   ];
 
   const totalPayroll = records.reduce((acc, r) => acc + r.baseSalary, 0);
+
+  const handleRunPayroll = () => {
+    toast.success('Payroll processing started', {
+      description: 'The April 2026 pay run is now being processed.',
+    });
+  };
+
+  const handleSendPayslips = () => {
+    toast.success('Payslips sent', {
+      description: `Sent payslips to ${records.length} employees.`,
+    });
+  };
+
+  const handleExport = () => {
+    toast.success('Export started', {
+      description: 'Your CSV export is being generated and will download shortly.',
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto h-full">
@@ -65,7 +84,7 @@ export default function PayrollClient({ records }: { records: Payroll[] }) {
             <button className="px-5 py-2.5 bg-white text-primary rounded-lg font-semibold text-[14px] shadow-sm hover:bg-white/90 transition-colors">
               Review pay run
             </button>
-            <button className="px-5 py-2.5 rounded-lg font-semibold text-[14px] border border-white/30 bg-white/10 hover:bg-white/20 transition-colors">
+            <button onClick={handleRunPayroll} className="px-5 py-2.5 rounded-lg font-semibold text-[14px] border border-white/30 bg-white/10 hover:bg-white/20 transition-colors">
               Run payroll →
             </button>
           </div>
@@ -120,10 +139,10 @@ export default function PayrollClient({ records }: { records: Payroll[] }) {
               placeholder="Search employee…" 
               className="w-[220px] bg-surface border border-border focus:border-ring rounded-md py-1.5 px-3 text-[12px] outline-none text-foreground transition-all"
             />
-            <button className="flex items-center gap-2 bg-surface border border-border px-3 py-1.5 rounded-lg text-[12px] font-medium text-foreground hover:bg-accent transition-colors">
+            <button onClick={handleSendPayslips} className="flex items-center gap-2 bg-surface border border-border px-3 py-1.5 rounded-lg text-[12px] font-medium text-foreground hover:bg-accent transition-colors">
               <Send className="w-3.5 h-3.5" /> Send all payslips
             </button>
-            <button className="flex items-center gap-2 bg-surface border border-border px-3 py-1.5 rounded-lg text-[12px] font-medium text-foreground hover:bg-accent transition-colors">
+            <button onClick={handleExport} className="flex items-center gap-2 bg-surface border border-border px-3 py-1.5 rounded-lg text-[12px] font-medium text-foreground hover:bg-accent transition-colors">
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
           </div>

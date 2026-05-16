@@ -2,6 +2,7 @@
 
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
+import { Toaster } from 'sonner';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+      <Toaster position="bottom-right" toastOptions={{
+        className: 'bg-card border-border text-foreground',
+      }} />
     </div>
   );
 }

@@ -1,7 +1,10 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import { useState } from 'react';
+import { Download, Plus } from 'lucide-react';
 import { format } from 'date-fns';
+import { Modal } from '@/components/ui/Modal';
+import { toast } from 'sonner';
 
 type Leave = {
   id: string;
@@ -18,14 +21,41 @@ type Leave = {
 };
 
 export default function LeaveClient({ requests }: { requests: Leave[] }) {
+  const [filter, setFilter] = useState('ALL');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const filteredRequests = requests.filter(r => filter === 'ALL' || r.status === filter);
+
+  const handleApplyLeave = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsModalOpen(false);
+      toast.success('Leave request submitted', {
+        description: 'Your request has been sent to your manager for approval.',
+      });
+    }, 800);
+  };
+
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto h-full">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Time Off</h1>
-          <p className="text-[13px] text-muted-foreground mt-1">Leave Management</p>
+    <>
+      <div className="flex flex-col gap-6 max-w-7xl mx-auto h-full">
+        <div className="flex justify-between items-end">
+          <div>
+            <h1 className="text-[22px] font-semibold tracking-tight">Time Off</h1>
+            <p className="text-[13px] text-muted-foreground mt-1">Leave Management</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 bg-surface border border-border px-4 py-2 rounded-lg text-[13px] font-medium text-foreground hover:bg-accent transition-colors">
+              <Download className="w-4 h-4" /> Export
+            </button>
+            <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-primary border border-primary px-4 py-2 rounded-lg text-[13px] font-medium text-white shadow-sm hover:bg-primary/90 transition-colors">
+              <Plus className="w-4 h-4" /> Request leave
+            </button>
+          </div>
         </div>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
@@ -111,6 +141,51 @@ export default function LeaveClient({ requests }: { requests: Leave[] }) {
           </table>
         </div>
       </div>
-    </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Request time off">
+        <form onSubmit={handleApplyLeave} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Leave type</label>
+            <select required className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all">
+              <option value="ANNUAL">Annual Leave (14 days left)</option>
+              <option value="SICK">Sick Leave (5 days left)</option>
+              <option value="UNPAID">Unpaid Leave</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Start date</label>
+              <input required type="date" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">End date</label>
+              <input required type="date" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Reason (Optional)</label>
+            <textarea placeholder="Add a note for your manager..." className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all min-h-[80px]" />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Attachment (Optional)</label>
+            <input type="file" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all file:border-0 file:bg-transparent file:text-[13px] file:font-medium file:text-primary hover:file:cursor-pointer" />
+            <div className="text-[11px] text-muted-foreground mt-0.5">Required for sick leave &gt; 2 days</div>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-[13px] font-medium text-foreground hover:bg-surface rounded-lg transition-colors border border-transparent hover:border-border">
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-primary text-white text-[13px] font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50">
+              {isSubmitting ? 'Submitting...' : 'Submit request'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+      </div>
+    </>
   );
 }

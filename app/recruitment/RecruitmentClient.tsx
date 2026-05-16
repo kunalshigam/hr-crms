@@ -16,13 +16,35 @@ type Job = {
 };
 
 export default function RecruitmentClient({ jobs }: { jobs: Job[] }) {
+  const [search, setSearch] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const filteredJobs = jobs.filter(j => 
+    j.title.toLowerCase().includes(search.toLowerCase()) ||
+    (j.department?.name || '').toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleCreateJob = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsModalOpen(false);
+      toast.success('Job posting created', {
+        description: 'Your new job posting is now live and accepting candidates.',
+      });
+    }, 800);
+  };
+
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto h-full">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Recruitment</h1>
-          <p className="text-[13px] text-muted-foreground mt-1">Open positions</p>
-        </div>
+    <>
+      <div className="flex flex-col gap-6 max-w-7xl mx-auto h-full">
+        <div className="flex justify-between items-end">
+          <div>
+            <h1 className="text-[22px] font-semibold tracking-tight">Recruitment</h1>
+            <p className="text-[13px] text-muted-foreground mt-1">Open positions</p>
+          </div>
       </div>
 
       <div className="flex flex-col flex-1">
@@ -95,6 +117,56 @@ export default function RecruitmentClient({ jobs }: { jobs: Job[] }) {
           ))}
         </div>
       </div>
-    </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create job posting">
+        <form onSubmit={handleCreateJob} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Job title</label>
+            <input required type="text" placeholder="e.g. Senior Frontend Engineer" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Department</label>
+              <select required className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all">
+                <option value="">Select department...</option>
+                <option value="engineering">Engineering</option>
+                <option value="design">Design</option>
+                <option value="product">Product</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Employment type</label>
+              <select required className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all">
+                <option value="full-time">Full-time</option>
+                <option value="contract">Contract</option>
+                <option value="internship">Internship</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Location</label>
+              <input required type="text" placeholder="e.g. Remote, San Francisco" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Salary range</label>
+              <input type="text" placeholder="e.g. $120k - $150k" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-[13px] font-medium text-foreground hover:bg-surface rounded-lg transition-colors border border-transparent hover:border-border">
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-primary text-white text-[13px] font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50">
+              {isSubmitting ? 'Creating...' : 'Create job'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+      </div>
+    </>
   );
 }

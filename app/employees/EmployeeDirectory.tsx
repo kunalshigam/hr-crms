@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Search, Filter, Plus, MoreHorizontal, Download } from 'lucide-react';
 import { format } from 'date-fns';
+import { Modal } from '@/components/ui/Modal';
+import { toast } from 'sonner';
 
 type Employee = {
   id: string;
@@ -18,6 +20,8 @@ type Employee = {
 
 export default function EmployeeDirectory({ initialEmployees }: { initialEmployees: Employee[] }) {
   const [search, setSearch] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const employees = initialEmployees.filter(e => 
     `${e.firstName} ${e.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
@@ -25,22 +29,38 @@ export default function EmployeeDirectory({ initialEmployees }: { initialEmploye
     (e.designation || '').toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleAddEmployee = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsModalOpen(false);
+      toast.success('Employee added successfully', {
+        description: 'Maya Chen has been added to the directory.',
+      });
+    }, 800);
+  };
+
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto h-full">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Employee Directory</h1>
-          <p className="text-[13px] text-muted-foreground mt-1">Manage your team members and their profiles.</p>
+    <>
+      <div className="flex flex-col gap-6 max-w-7xl mx-auto h-full">
+        <div className="flex justify-between items-end">
+          <div>
+            <h1 className="text-[22px] font-semibold tracking-tight">Employee Directory</h1>
+            <p className="text-[13px] text-muted-foreground mt-1">Manage your team members and their profiles.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 bg-surface border border-border px-4 py-2 rounded-lg text-[13px] font-medium text-foreground hover:bg-accent transition-colors">
+              <Download className="w-4 h-4" /> Export CSV
+            </button>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 bg-primary border border-primary px-4 py-2 rounded-lg text-[13px] font-medium text-white shadow-sm hover:bg-primary/90 transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Add Employee
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-surface border border-border px-4 py-2 rounded-lg text-[13px] font-medium text-foreground hover:bg-accent transition-colors">
-            <Download className="w-4 h-4" /> Export CSV
-          </button>
-          <button className="flex items-center gap-2 bg-primary border border-primary px-4 py-2 rounded-lg text-[13px] font-medium text-white shadow-sm hover:bg-primary/90 transition-colors">
-            <Plus className="w-4 h-4" /> Add Employee
-          </button>
-        </div>
-      </div>
 
       <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-border flex justify-between items-center bg-card shrink-0 gap-4">
@@ -127,6 +147,53 @@ export default function EmployeeDirectory({ initialEmployees }: { initialEmploye
           </div>
         </div>
       </div>
-    </div>
+      
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add new employee">
+        <form onSubmit={handleAddEmployee} className="flex flex-col gap-5">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">First name</label>
+              <input required type="text" placeholder="Maya" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Last name</label>
+              <input required type="text" placeholder="Chen" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Work email</label>
+            <input required type="email" placeholder="maya.chen@acme.co" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Department</label>
+              <select required className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all">
+                <option value="">Select department...</option>
+                <option value="engineering">Engineering</option>
+                <option value="design">Design</option>
+                <option value="product">Product</option>
+                <option value="sales">Sales</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Role</label>
+              <input required type="text" placeholder="e.g. Senior Developer" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-[13px] font-medium text-foreground hover:bg-surface rounded-lg transition-colors border border-transparent hover:border-border">
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-primary text-white text-[13px] font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50">
+              {isSubmitting ? 'Adding...' : 'Add employee'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+      </div>
+    </>
   );
 }

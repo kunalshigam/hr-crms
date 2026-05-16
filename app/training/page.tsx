@@ -1,8 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { Plus, GraduationCap, Clock, Users } from 'lucide-react';
+import { Modal } from '@/components/ui/Modal';
+import { toast } from 'sonner';
 
 export default function TrainingPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const courses = [
     { id: 1, title: "Manager Essentials: First 90 Days", category: "Leadership", duration: "3h 45m", enrolled: 38, status: "Active" },
     { id: 2, title: "Information Security 2026", category: "Compliance", duration: "45m", enrolled: 248, status: "Active" },
@@ -12,31 +18,47 @@ export default function TrainingPage() {
     { id: 6, title: "Anti-Harassment Training", category: "Compliance", duration: "1h 00m", enrolled: 248, status: "Active" },
   ];
 
-  return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto h-full">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Training</h1>
-          <p className="text-[13px] text-muted-foreground mt-1">Course catalog</p>
-        </div>
-      </div>
+  const handleCreateCourse = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsModalOpen(false);
+      toast.success('Course created', {
+        description: 'New training course has been saved as a draft.',
+      });
+    }, 800);
+  };
 
-      <div className="flex gap-2 mb-2">
-        <input 
-          type="text" 
-          placeholder="Search courses…" 
-          className="flex-1 max-w-[320px] bg-surface border border-border focus:border-ring rounded-md py-1.5 px-3 text-[13px] outline-none text-foreground transition-all"
-        />
-        <select className="bg-surface border border-border rounded-md px-3 py-1.5 text-[13px] text-foreground outline-none w-[160px]">
-          <option>All categories</option>
-          <option>Leadership</option>
-          <option>Compliance</option>
-        </select>
-        <div className="flex-1" />
-        <button className="flex items-center gap-2 bg-primary border border-primary px-3 py-1.5 rounded-lg text-[13px] font-medium text-white shadow-sm hover:bg-primary/90 transition-colors">
-          <Plus className="w-3.5 h-3.5" /> New course
-        </button>
-      </div>
+  return (
+    <>
+      <div className="flex flex-col gap-6 max-w-7xl mx-auto h-full">
+        <div className="flex justify-between items-end">
+          <div>
+            <h1 className="text-[22px] font-semibold tracking-tight">Training</h1>
+            <p className="text-[13px] text-muted-foreground mt-1">Course catalog</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mb-2">
+          <input 
+            type="text" 
+            placeholder="Search courses…" 
+            className="flex-1 max-w-[320px] bg-surface border border-border focus:border-ring rounded-md py-1.5 px-3 text-[13px] outline-none text-foreground transition-all"
+          />
+          <select className="bg-surface border border-border rounded-md px-3 py-1.5 text-[13px] text-foreground outline-none w-[160px]">
+            <option>All categories</option>
+            <option>Leadership</option>
+            <option>Compliance</option>
+          </select>
+          <div className="flex-1" />
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-primary border border-primary px-3 py-1.5 rounded-lg text-[13px] font-medium text-white shadow-sm hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" /> New course
+          </button>
+        </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses.map((c, i) => (
@@ -70,6 +92,46 @@ export default function TrainingPage() {
           </div>
         ))}
       </div>
-    </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create new course">
+        <form onSubmit={handleCreateCourse} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Course title</label>
+            <input required type="text" placeholder="e.g. Diversity & Inclusion 101" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Category</label>
+              <select required className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all">
+                <option value="">Select category...</option>
+                <option value="compliance">Compliance</option>
+                <option value="leadership">Leadership</option>
+                <option value="skills">Technical Skills</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-semibold text-foreground">Estimated duration</label>
+              <input required type="text" placeholder="e.g. 2h 30m" className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-foreground">Course outline or syllabus</label>
+            <textarea placeholder="Briefly describe what this course covers..." className="w-full bg-surface border border-border focus:border-ring rounded-md py-2 px-3 text-[13px] outline-none text-foreground transition-all min-h-[80px]" />
+          </div>
+
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-[13px] font-medium text-foreground hover:bg-surface rounded-lg transition-colors border border-transparent hover:border-border">
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-primary text-white text-[13px] font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50">
+              {isSubmitting ? 'Saving...' : 'Save as draft'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+      </div>
+    </>
   );
 }

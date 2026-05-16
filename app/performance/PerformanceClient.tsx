@@ -2,6 +2,7 @@
 
 import { BarChart, Bar, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Star } from 'lucide-react';
+import { toast } from 'sonner';
 
 type Review = {
   id: string;
@@ -21,6 +22,12 @@ export default function PerformanceClient({ reviews }: { reviews: Review[] }) {
     { label: "Sales", value: 4.0 }, { label: "Ops", value: 4.2 },
     { label: "Finance", value: 3.9 }, { label: "Support", value: 4.3 },
   ];
+
+  const handleRemindAll = () => {
+    toast.success('Reminders sent', {
+      description: 'Reminders have been sent to all employees with pending reviews.',
+    });
+  };
 
   // Dummy top performers
   const topPerformers = [
@@ -92,8 +99,8 @@ export default function PerformanceClient({ reviews }: { reviews: Review[] }) {
       <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col flex-1 min-h-0">
         <div className="p-4 border-b border-border flex justify-between items-center bg-card shrink-0">
           <h3 className="text-[15px] font-semibold font-heading">Top performers · Q3</h3>
-          <button className="flex items-center gap-2 bg-surface border border-border px-3 py-1.5 rounded-lg text-[12px] font-medium text-foreground hover:bg-accent transition-colors">
-            View all 248
+          <button onClick={handleRemindAll} className="flex items-center gap-2 bg-surface border border-border px-3 py-1.5 rounded-lg text-[12px] font-medium text-foreground hover:bg-accent transition-colors">
+            Send reminders
           </button>
         </div>
         
