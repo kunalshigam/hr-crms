@@ -75,12 +75,12 @@ export default function PipelineClient({ job, candidates }: { job: Job, candidat
 
       <div className="flex gap-4 overflow-x-auto pb-4 flex-1 items-start min-h-0">
         {stages.map((s, idx) => {
-          const cs = candidates.filter(c => c.stage === s);
+          const cs = candidates.filter(c => c.stage === s.id);
           return (
-            <div key={s} className="flex-1 min-w-[280px] flex flex-col gap-3 bg-surface border border-border rounded-xl p-3 max-h-full">
+            <div key={s.id} className="flex-1 min-w-[280px] flex flex-col gap-3 bg-surface border border-border rounded-xl p-3 max-h-full">
               <div className="flex justify-between items-center px-1 mb-1">
                 <div className="text-[14px] font-heading font-semibold text-foreground">
-                  {s} <span className="text-muted-foreground font-normal ml-1">· {cs.length}</span>
+                  {s.label} <span className="text-muted-foreground font-normal ml-1">· {cs.length}</span>
                 </div>
                 <button className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-border transition-colors">
                   <Plus className="w-4 h-4" />
